@@ -110,3 +110,9 @@ class CSWTestCase(unittest.TestCase):
 
         self.assertGreater(len(south_bound_lat), 0,
                         msg="No South Bound Latitude elements found")
+
+    def test04_fail(self):
+        self.assertFalse(True, msg='Expecting false')
+
+    def test05_excep(self):
+        raise Exception('Argh')
