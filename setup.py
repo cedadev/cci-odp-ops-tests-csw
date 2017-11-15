@@ -53,13 +53,12 @@ setup(
         'Topic :: Internet',
         'Topic :: Scientific/Engineering',
         'Topic :: System :: Distributed Computing',
-        'Topic :: System :: Systems Administration :: Authentication/Directory',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     entry_points={
         'console_scripts': [
             'cci_odp_csw_test = '
-            'ceda.cci_odp_ops_tests.scripts.nagios_csw_test:main',
+            'ceda.cci_odp_ops_tests.nagios_test.csw_test:main',
         ],
     },
     zip_safe = False

@@ -52,6 +52,9 @@ class CSWTestCase(unittest.TestCase):
     GML_NS_URI = "http://www.opengis.net/gml/3.2"
     GCO_NS_URI = "http://www.isotc211.org/2005/gco"
 
+    GET_RECS_RESP_TAG = ('{http://www.opengis.net/cat/csw/2.0.2}'
+                         'GetRecordsResponse')
+
     def _csw_query(self, csw_uri, post_query, headers):
         response = requests.post(csw_uri, data=post_query, headers=headers)
 
@@ -64,6 +67,9 @@ class CSWTestCase(unittest.TestCase):
                                      self.__class__.DASHBOARD_CSW_QUERY_BODY,
                                      self.__class__.DASHBOARD_CSW_QUERY_HDR)
         self.assertEqual(status_code, 200, msg="Expecting 200 OK response code")
+        self.assertEqual(resp_elem.tag, self.__class__.GET_RECS_RESP_TAG,
+                           msg="Expecting {} tag".format(
+                               self.__class__.GET_RECS_RESP_TAG))
 
     def test02_csw_dashboard_check_temporal_extent(self):
         status_code, resp_elem = self._csw_query(self.__class__.CSW_URI,
