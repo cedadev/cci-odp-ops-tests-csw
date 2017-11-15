@@ -67,7 +67,7 @@ class CciCswNagiosCtx(nagiosplugin.context.Context):
             status = nagiosplugin.context.Ok
             hint = '{} test passed'.format(test_name)
 
-        return self.result_cls(status, metric=metric)
+        return self.result_cls(status, hint=hint, metric=metric)
 
 class CciCSW(nagiosplugin.Resource):
     '''Nagios resource abstraction - CCI CSW in this case
