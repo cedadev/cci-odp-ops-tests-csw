@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Distribution Utilities setup program for CCI OGC TDS scanning Package
+"""Distribution Utilities setup program for CCI OGC CSW ops test package
 
 Contrail Project
 """
@@ -20,13 +20,13 @@ except ImportError:
 
 
 setup(
-    name =                'cci-odp-ops-tests-csw',
-    version =             '0.1.0',
-    description =         'Test CCI Open Data Portal CSW Service',
-    long_description =    '''Tests based on unit test framework
+    name =              'cci-odp-ops-tests-csw',
+    version =           '0.1.0',
+    description =       'Test CCI Open Data Portal CSW Service',
+    long_description =  '''Tests based on unit test framework
 ''',
-    author =              'Philip Kershaw',
-    author_email =        'Philip.Kershaw@stfc.ac.uk',
+    author =            'Philip Kershaw',
+    author_email =      'Philip.Kershaw@stfc.ac.uk',
     maintainer =        'Philip Kershaw',
     maintainer_email =  'Philip.Kershaw@stfc.ac.uk',
     platforms =         ['POSIX', 'Linux', 'Windows'],
