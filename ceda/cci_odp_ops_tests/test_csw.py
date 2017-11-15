@@ -14,6 +14,7 @@ import requests
 
 
 class CSWTestCase(unittest.TestCase):
+    '''Unit test case for testing ESA CCI Open Data Portal CSW'''
 
     CSW_URI = 'https://csw.ceda.ac.uk/geonetwork/srv/eng/csw-CEDA-CCI'
     DASHBOARD_CSW_QUERY_HDR = {"Content-type": "application/xml"}
