@@ -22,7 +22,11 @@ class CciCswNagiosCtx(nagiosplugin.context.Context):
     '''Nagios Context - sets tests to run and executes them'''
     def evaluate(self, metric, resource):
         '''Run tests from CSW unittest case'''
-        tests = unittest.defaultTestLoader.loadTestsFromName(metric[0],
+        # The test may be an individual one or a whole test case.  For the
+        # latter, this may involve multiple tests
+        test_name = metric[0]
+
+        tests = unittest.defaultTestLoader.loadTestsFromName(test_name,
                                         module=ceda.cci_odp_ops_tests.test_csw)
 
         result = unittest.TestResult()
@@ -31,17 +35,37 @@ class CciCswNagiosCtx(nagiosplugin.context.Context):
         n_errors = len(result.errors)
         n_problems = n_failures + n_errors
 
-        if result.testsRun == n_problems:
-            # Overall fail
-            status = nagiosplugin.context.Critical
+        # If the whole test case is run then multiple tests will be executed
+        # so need to cater for multiple results:
+        if n_problems > 0:
+            if result.testsRun == n_problems:
+                # Overall fail
+                status = nagiosplugin.context.Critical
+                hint = 'All tests failed: '
+            else:
+                # Overall warning
+                status = nagiosplugin.context.Warn
+                hint = 'Some tests failed: '
 
-        elif n_problems > 0:
-            # Overall warning
-            status = nagiosplugin.context.Warn
+            # Pass text for first error in the hint
+            if n_errors:
+                hint += str(result.errors[0][0])
+            elif n_failures:
+                hint += str(result.failures[0][0])
 
+            # Log all the rest
+            for error in result.errors:
+                log.error(error[0])
+                log.error(error[1])
+
+            # Log all the rest
+            for failure in result.failures:
+                log.error(failure[0])
+                log.error(failure[1])
         else:
             # Overall pass
             status = nagiosplugin.context.Ok
+            hint = '{} test passed'.format(test_name)
 
         return self.result_cls(status, metric=metric)
 
@@ -64,6 +88,17 @@ class CciCSW(nagiosplugin.Resource):
             yield nagiosplugin.Metric(test_name, True, context='CciCswCtx')
 
 
+class CciCswTestResultsSummary(nagiosplugin.Summary):
+    """Present output summary
+    """
+    def ok(self, results):
+        return ', '.join([result.hint for result in results])
+
+    def problem(self, results):
+        return 'Problems with test: ' + ', '.join([result.hint
+                                                     for result in results])
+
+
 @nagiosplugin.guarded
 def main():
     '''Top-level function for script'''
@@ -84,7 +119,9 @@ def main():
     else:
         test_names = None
 
-    check = nagiosplugin.Check(CciCSW(test_names), CciCswNagiosCtx('CciCswCtx'))
+    check = nagiosplugin.Check(CciCSW(test_names),
+                               CciCswNagiosCtx('CciCswCtx'),
+                               CciCswTestResultsSummary())
     check.name = 'CCI-CSW'
     check.main()
 
