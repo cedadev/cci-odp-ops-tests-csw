@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Nagios script to test CCI Open Data Portal CSW service
 """
-from ceda.cci_odp_ops_tests.test_csw import CSWTestCase
 __author__ = "P J Kershaw"
 __date__ = "10/11/17"
 __copyright__ = "(C) 2017 Science and Technology Facilities Council"
@@ -12,14 +11,19 @@ import unittest
 import logging
 
 import nagiosplugin
+from slack_logging_handler.handler import SlackHandler
 
-import ceda.cci_odp_ops_tests.test_csw
-
-log = logging.getLogger(__name__)
+log = logging.getLogger('nagiosplugin')
 
 
-class CciCswNagiosCtx(nagiosplugin.context.Context):
+class UnittestCaseContext(nagiosplugin.context.Context):
     '''Nagios Context - sets tests to run and executes them'''
+
+    def __init__(self, *args, **kwargs):
+        '''Overload in order to obtain module name for unittests'''
+        self._unittest_module_name = kwargs.pop('unittest_module_name', None)
+        super(UnittestCaseContext, self).__init__(*args, **kwargs)
+
     def evaluate(self, metric, resource):
         '''Run tests from CSW unittest case'''
         # The test may be an individual one or a whole test case.  For the
@@ -27,7 +31,7 @@ class CciCswNagiosCtx(nagiosplugin.context.Context):
         test_name = metric[0]
 
         tests = unittest.defaultTestLoader.loadTestsFromName(test_name,
-                                        module=ceda.cci_odp_ops_tests.test_csw)
+                                            module=self._unittest_module_name)
 
         result = unittest.TestResult()
         tests.run(result)
@@ -69,62 +73,87 @@ class CciCswNagiosCtx(nagiosplugin.context.Context):
 
         return self.result_cls(status, hint=hint, metric=metric)
 
-class CciCSW(nagiosplugin.Resource):
-    '''Nagios resource abstraction - CCI CSW in this case
+class UnittestCaseResource(nagiosplugin.Resource):
+    '''Nagios resource abstraction for unittest case
     '''
     def __init__(self, test_names):
         '''Overload to pass special test_names parameter'''
-        super(CciCSW, self).__init__()
+        super(UnittestCaseResource, self).__init__()
 
-        if test_names is None:
-            self.test_names = ['CSWTestCase']
-        else:
-            self.test_names = test_names
+        self.test_names = test_names
 
     def probe(self):
         '''Special probe method applies the metrics for the resource'''
         for test_name in self.test_names:
-            log.info('Running {}'.format(test_name))
-            yield nagiosplugin.Metric(test_name, True, context='CciCswCtx')
+            yield nagiosplugin.Metric(test_name, True,
+                                      context='UnittestCaseContext')
 
 
-class CciCswTestResultsSummary(nagiosplugin.Summary):
+class UnittestCaseResultsSummary(nagiosplugin.Summary):
     """Present output summary
     """
     def ok(self, results):
-        return ', '.join([result.hint for result in results])
+        msg = ', '.join([result.hint for result in results])
+        log.info(msg)
+        return msg
 
     def problem(self, results):
-        return 'Problems with test: ' + ', '.join([result.hint
-                                                     for result in results])
+        msg = 'Problems with test: ' + ', '.join([result.hint
+                                                  for result in results])
+        log.info(msg)
+        return msg
 
 
 @nagiosplugin.guarded
-def main():
+def main(unittest_module_name, unittestcase_class, slack_webhook_url=None,
+         slack_channel=None, slack_user=None):
     '''Top-level function for script'''
+
+    if slack_webhook_url is not None:
+        log.addHandler(SlackHandler(slack_webhook_url,
+                                    channel=slack_channel,
+                                    username=slack_user))
+
     import sys
     import os
     if '-h' in sys.argv:
         prog_name = os.path.basename(sys.argv[0])
-        csw_test_names = ['CSWTestCase.{}'.format(name_)
-                          for name_ in dir(CSWTestCase)
+
+        test_names = ['{}.{}'.format(unittestcase_class.__name__, name_)
+                          for name_ in dir(unittestcase_class)
                           if name_.startswith('test')]
-        csw_test_names_displ = '-h|CSWTestCase|' + '|'.join(csw_test_names)
+        test_names_displ = '-h|{}|'.format(unittestcase_class.__name__) + \
+                            '|'.join(test_names)
         raise SystemExit('Usage: {} <{}>{}'.format(prog_name,
-                                                 csw_test_names_displ,
-                                                 os.linesep))
+                                                   test_names_displ,
+                                                   os.linesep))
 
     elif len(sys.argv) > 1:
         test_names = sys.argv[1:]
     else:
-        test_names = None
+        # If no explicit test names are set, pass the unit test class name -
+        # This will cause all tests to be executed.
+        test_names = [unittestcase_class.__name__]
 
-    check = nagiosplugin.Check(CciCSW(test_names),
-                               CciCswNagiosCtx('CciCswCtx'),
-                               CciCswTestResultsSummary())
-    check.name = 'CCI-CSW'
+    nagios_resource = UnittestCaseResource(test_names)
+    nagios_context = UnittestCaseContext('UnittestCaseContext',
+                                    unittest_module_name=unittest_module_name)
+
+    nagios_results_summary = UnittestCaseResultsSummary()
+    check = nagiosplugin.Check(nagios_resource, nagios_context,
+                               nagios_results_summary)
+
+    check.name = unittestcase_class.__name__
     check.main()
 
 
 if __name__ == "__main__":
-    main()
+    SLACK_WEBHOOK_URL = #CHANGE-ME
+    SLACK_CHANNEL = 'cci-odp-ops-logging'
+    SLACK_USER = 'cci-ops-test'
+
+    import ceda.cci_odp_ops_tests.test_csw
+    from ceda.cci_odp_ops_tests.test_csw import CSWTestCase
+    main(ceda.cci_odp_ops_tests.test_csw, CSWTestCase,
+         slack_webhook_url=SLACK_WEBHOOK_URL,
+         slack_channel=SLACK_CHANNEL, slack_user=SLACK_USER)
