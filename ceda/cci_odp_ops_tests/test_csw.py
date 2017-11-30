@@ -68,35 +68,42 @@ class CSWTestCase(unittest.TestCase):
                                      self.__class__.DASHBOARD_CSW_QUERY_HDR)
         self.assertEqual(status_code, 200, msg="Expecting 200 OK response code")
         self.assertEqual(resp_elem.tag, self.__class__.GET_RECS_RESP_TAG,
-                           msg="Expecting {} tag".format(
-                               self.__class__.GET_RECS_RESP_TAG))
+                         msg="Expecting {} tag in response for {!r}".format(
+                               self.__class__.GET_RECS_RESP_TAG,
+                               self.__class__.CSW_URI))
 
     def test02_csw_dashboard_check_temporal_extent(self):
         status_code, resp_elem = self._csw_query(self.__class__.CSW_URI,
                                      self.__class__.DASHBOARD_CSW_QUERY_BODY,
                                      self.__class__.DASHBOARD_CSW_QUERY_HDR)
-        self.assertEqual(status_code, 200, msg="Expecting 200 OK response code")
+        self.assertEqual(status_code, 200,
+                         msg="Expecting 200 OK response code for {!r}".format(
+                             self.__class__.CSW_URI))
 
         temporal_start_time = resp_elem.findall(
             ".//{%s}TimePeriod/{%s}beginPosition"
             % (2*(self.__class__.GML_NS_URI,)))
 
         self.assertGreater(len(temporal_start_time), 0,
-                        msg="No temporal start elements found")
+                           msg="No temporal start elements found for "
+                            "{!r}".format(self.__class__.CSW_URI))
 
         temporal_end_time = resp_elem.findall(
             ".//{%s}TimePeriod/{%s}endPosition"
             % (2*(self.__class__.GML_NS_URI,)))
 
         self.assertGreater(len(temporal_end_time), 0,
-                        msg="No temporal end elements found")
+                        msg="No temporal end elements found for {!r}".format(
+                        "self.__class__.CSW_URI"))
 
 
     def test03_csw_dashboard_check_geographic_extent(self):
         status_code, resp_elem = self._csw_query(self.__class__.CSW_URI,
                                      self.__class__.DASHBOARD_CSW_QUERY_BODY,
                                      self.__class__.DASHBOARD_CSW_QUERY_HDR)
-        self.assertEqual(status_code, 200, msg="Expecting 200 OK response code")
+        self.assertEqual(status_code, 200,
+                         msg="Expecting 200 OK response code for {!r}".format(
+                             self.__class__.CSW_URI))
 
         west_bound_lon = resp_elem.findall(
             ".//{%s}geographicElement"
@@ -106,7 +113,8 @@ class CSWTestCase(unittest.TestCase):
             % (3*(self.__class__.GMD_NS_URI,) + (self.__class__.GCO_NS_URI,)))
 
         self.assertGreater(len(west_bound_lon), 0,
-                        msg="No West Bound Longitude elements found")
+                           msg="No West Bound Longitude elements found in "
+                           "response {!r}".format(self.__class__.CSW_URI))
 
         south_bound_lat = resp_elem.findall(
             ".//{%s}geographicElement"
@@ -116,5 +124,6 @@ class CSWTestCase(unittest.TestCase):
             % (3*(self.__class__.GMD_NS_URI,) + (self.__class__.GCO_NS_URI,)))
 
         self.assertGreater(len(south_bound_lat), 0,
-                        msg="No South Bound Latitude elements found")
+                        msg="No South Bound Latitude elements found in "
+                        "response {!r}".format(self.__class__.CSW_URI))
 
