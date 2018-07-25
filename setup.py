@@ -21,9 +21,9 @@ except ImportError:
 
 setup(
     name =              'cci-odp-ops-tests-csw',
-    version =           '0.3.0',
+    version =           '0.3.1',
     description =       'Test CCI Open Data Portal CSW Service',
-    long_description =  '''Tests based on unit test framework
+    long_description =  '''Tests based on unit test framework and Nagios
 ''',
     author =            'Philip Kershaw',
     author_email =      'Philip.Kershaw@stfc.ac.uk',
