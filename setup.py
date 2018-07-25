@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Distribution Utilities setup program for CCI OGC TDS scanning Package
+"""Distribution Utilities setup program for CCI OGC CSW ops test package
 
 Contrail Project
 """
@@ -20,13 +20,13 @@ except ImportError:
 
 
 setup(
-    name =                'cci-odp-ops-tests-csw',
-    version =             '0.1.0',
-    description =         'Test CCI Open Data Portal CSW Service',
-    long_description =    '''Tests based on unit test framework
+    name =              'cci-odp-ops-tests-csw',
+    version =           '0.3.1',
+    description =       'Test CCI Open Data Portal CSW Service',
+    long_description =  '''Tests based on unit test framework and Nagios
 ''',
-    author =              'Philip Kershaw',
-    author_email =        'Philip.Kershaw@stfc.ac.uk',
+    author =            'Philip Kershaw',
+    author_email =      'Philip.Kershaw@stfc.ac.uk',
     maintainer =        'Philip Kershaw',
     maintainer_email =  'Philip.Kershaw@stfc.ac.uk',
     platforms =         ['POSIX', 'Linux', 'Windows'],
@@ -53,13 +53,12 @@ setup(
         'Topic :: Internet',
         'Topic :: Scientific/Engineering',
         'Topic :: System :: Distributed Computing',
-        'Topic :: System :: Systems Administration :: Authentication/Directory',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     entry_points={
         'console_scripts': [
             'cci_odp_csw_test = '
-            'ceda.cci_odp_ops_tests.scripts.nagios_csw_test:main',
+            'ceda.cci_odp_ops_tests.nagios_test.csw_test:main',
         ],
     },
     zip_safe = False
