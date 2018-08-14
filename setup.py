@@ -21,7 +21,7 @@ except ImportError:
 
 setup(
     name =              'cci-odp-ops-tests-csw',
-    version =           '0.3.1',
+    version =           '0.4.0',
     description =       'Test CCI Open Data Portal CSW Service',
     long_description =  '''Tests based on unit test framework and Nagios
 ''',
