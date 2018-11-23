@@ -3,7 +3,7 @@
 """
 __author__ = "P J Kershaw"
 __date__ = "10/11/17"
-__copyright__ = "(C) 2017 Science and Technology Facilities Council"
+__copyright__ = "Copyright 2018 United Kingdom Research and Innovation"
 __license__ = """BSD - See LICENSE file in top-level directory"""
 __contact__ = "Philip.Kershaw@stfc.ac.uk"
 __revision__ = '$Id$'
