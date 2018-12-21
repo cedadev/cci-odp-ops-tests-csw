@@ -29,6 +29,13 @@ class CSWTestCase(unittest.TestCase):
     
     CSW_QUERY_HDR = {"Content-type": "application/xml"}
     
+    CSW_CORS_QUERY_HDR = {
+        'Origin': 'http://sample.com',
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'X-Requested-With'
+    }
+    CSW_CORS_QUERY_HDR.update(CSW_QUERY_HDR)
+    
     DASHBOARD_CSW_QUERY_BODY = '''<?xml version="1.0" encoding="UTF-8"?>
 <csw:GetRecords
     xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
@@ -216,3 +223,13 @@ class CSWTestCase(unittest.TestCase):
             
         self.assertGreater(n_search_results_matched, 0, 
                            msg='No search results matched')
+        
+    def test05_cors(self):
+        # Needed for JS queries to the service from the CCI web presence
+        response = requests.options(self.__class__.CSW_URI, 
+                                    headers=self.__class__.CSW_CORS_QUERY_HDR)
+        
+        self.assertEqual(response.status_code, 200, 
+                         msg="Expecting 200 OK response code for CORS "
+                             "request")
+       
